@@ -459,9 +459,11 @@ function Reboot
 }
 function GetStep
 {param($Project)
+
     $WorkFolder = $Project.WORKFOLDER
     $stepfile = "step.ini"
     $stepfileFullName = $WorkFolder + "\" + $stepfile
+    
     if(!(Test-Path $stepfileFullName ))
     { 
         New-Item -ItemType File -Path $WorkDirectory -Name $stepfile  -Force | Out-Null
@@ -573,9 +575,8 @@ function Powershell51Install
     Set-Location -Path "C:\temp"
     . .\Install-WMF5.1.ps1 -AcceptEULA -AllowRestart -Confirm:$false
     # it will skip and continue if it's not there. 
-    
-    
-    #Start-Sleep -Seconds 
+    Start-Sleep -Seconds 600
+    Reboot 
 }
 
 function OPUninstall
@@ -679,7 +680,7 @@ function downlaodGitHub
     $file | Add-Member -type NoteProperty -name FULLPATH -Value "c:\temp\XML\OfficeProPlus_Install_EN_US.xml"
     $files += $file
     
-    Download2 -Source "https://raw.githubusercontent.com/SebasHilotech/OfficeUninstall/master/OfficeProPlus_Install_EN_US.xml" -Ouput "c:\temp\XML\OfficeProPlus_Install_EN_US.xml"
+    Download2 -Source "https://raw.githubusercontent.com/SebasHilotech/OfficeUninstall/master/deploiementOffice365.ps1" -Ouput "c:\temp\deploiementOffice365.ps1"
     $file = New-Object System.Object
     $Name = "deploiementOffice365"
     $file | Add-Member -type NoteProperty -name NAME -Value $Name
