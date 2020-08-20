@@ -641,6 +641,7 @@ switch($step)
             InstallO365 -ListFiles $ListFiles
         }
         DeleteTaskMigration
+        DeleteStuff -ListFiles $ListFiles
     }
     Default
     {
@@ -743,4 +744,3 @@ function DeleteStuff
         }
     }
 }
-DeleteStuff -ListFiles $ListFiles
