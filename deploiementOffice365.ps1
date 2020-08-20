@@ -208,7 +208,7 @@ function CheckIfOffice365Installed
         {
             if($program.UninstallString -match "MsiExec"){}else{$OfficeVersion += $program}
         }
-        if($program.DisplayName -like "icrosoft Office 365*")
+        if($program.DisplayName -like "Microsoft Office 365*")
         {
             if($program.UninstallString -match "MsiExec"){}else{$OfficeVersion += $program}
         }        
