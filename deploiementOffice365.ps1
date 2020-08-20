@@ -343,7 +343,8 @@ function Expand-ZIPFile($file, $destination)
 }
 function Download
 {param($id,$DownloadPath)
-    $WebClient = New-Object System.Net.WebClient  
+    $WebClient = New-Object System.Net.WebClient 
+    [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls11 -bor [System.Net.SecurityProtocolType]::Tls12 
     $url = "https://github.com/SebasHilotech/Production/blob/master/Remove-PreviousOfficeInstalls.zip"  
     $url = "https://drive.google.com/uc?id=" + $id + "&export=download"
     $DownloadPath = "C:\temp\Remove-PreviousOfficeInstalls.zip"
@@ -569,6 +570,7 @@ function IsPowershell51
 function Powershell51Install
 {
     $WebClient = New-Object System.Net.WebClient    
+    [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls11 -bor [System.Net.SecurityProtocolType]::Tls12 
     $WebClient.DownloadFile("http://download.microsoft.com/download/6/F/5/6F5FF66C-6775-42B0-86C4-47D41F2DA187/Win7AndW2K8R2-KB3191566-x64.zip","C:\temp\Win7AndW2K8R2-KB3191566-x64.zip")       
     Expand-ZIPFile -file "C:\temp\Win7AndW2K8R2-KB3191566-x64.zip" -destination "c:\temp\"
     Remove-Item -Path "C:\temp\Win7AndW2K8R2-KB3191566-x64.zip" 
@@ -584,6 +586,7 @@ function OPUninstall
     #Download -id "1ClipcaQFlHLkZjc7Wj0zS8-8LAbk41xn" -DownloadPath "c:\temp\Remove-PreviousOfficeInstalls.zip"
     $WebClient = New-Object System.Net.WebClient
     $url = "https://github.com/SebasHilotech/OfficeUninstall/raw/master/Remove-PreviousOfficeInstalls.zip"
+    [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls11 -bor [System.Net.SecurityProtocolType]::Tls12
     $WebClient.DownloadFile($url,"c:\temp\Remove-PreviousOfficeInstalls.zip")
 
     #expand-archive -path "c:\temp\Remove-PreviousOfficeInstalls.zip" -DestinationPath "C:\temp\" 
@@ -650,12 +653,14 @@ function Download2
 {param($Source,$Ouput)
 
     $WebClient = New-Object System.Net.WebClient
+    [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls11 -bor [System.Net.SecurityProtocolType]::Tls12
     $WebClient.DownloadFile($Source,$Ouput)
     $WebClient.Dispose()
 
 }
 function downlaodGitHub
 {
+    $stuff = [System.Net.ServicePointManager.SecurityProtocol]::new()
 
     $files = @()
  
