@@ -1,5 +1,5 @@
 #region set variable parameter
-param([string]$WorkDirectory = "c:\temp",[string]$projectid="1AcSuMPqhxAYm7zrpq-nXNLIcCu0IGZpk",[string]$listDownload="ListDownloadBraun.csv")
+param([string]$WorkDirectory = "c:\temp",[string]$projectid="1AcSuMPqhxAYm7zrpq-nXNLIcCu0IGZpk",[string]$listDownload="ListDownloadBraun.csv",[switch]$RMM)
 
 #region set function
 function getExe
@@ -607,7 +607,9 @@ function OPUninstall
 
 function CallStep
 {param($Project,$ListFiles)
+
 $step = GetStep -Project $Project
+
 switch($step)
 {
     "0"
@@ -621,6 +623,7 @@ switch($step)
     }
     "1"
     {
+
         $OfficeObject = CheckIfOfficeStillInstalled
         if($OfficeObject -ne $false)
         {
@@ -630,31 +633,94 @@ switch($step)
         }
 
         IncrementStep -Project $Project 
+        
     }
     "2"
     {
-        #Install Microsoft Office 365
-        InstallO365 -ListFiles $ListFiles
-        IncrementStep -Project $Project         
-        Reboot                
+
+        $result  = CheckIfOffice365Installed
+
+        if($result -eq $false)
+        {
+
+            #Install Microsoft Office 365
+            InstallO365 -ListFiles $ListFiles
+        
+        }
+
+        IncrementStep -Project $Project  
+
+        Reboot     
+
     }
     "3"
     {
+
         $result  = CheckIfOffice365Installed
+
         if($result -eq $false)
         {
+
             InstallO365 -ListFiles $ListFiles
+
         }
-        DeleteTaskMigration
-        DeleteStuff -ListFiles $ListFiles
+
+        $result  = CheckIfOffice365Installed
+        
+        if($result -eq $false)
+        {
+
+            Reboot    
+
+        }
+        else
+        {
+
+            DeleteTaskMigration
+
+            DeleteStuff -ListFiles $ListFiles
+
+        }
     }
     Default
     {
         # if something else, delete the task
-        DeleteTaskMigration           
+        DeleteTaskMigration
+
     }
   }
 }
+function DeleteStuff
+{param($ListFiles)
+    foreach($file in $ListFiles)
+    {
+        $item = $file.FULLPATH
+        if(test-path $item){Remove-Item -Path $item}
+    }
+    if(Test-Path -Path "C:\temp\Remove-PreviousOfficeInstalls")
+    {
+        Get-ChildItem "C:\temp\Remove-PreviousOfficeInstalls" | Remove-Item 
+        Remove-Item "C:\temp\Remove-PreviousOfficeInstalls"
+    }
+    if(Test-Path -Path "C:\temp\ListDownloadBraun.csv")
+    {
+        Remove-Item "C:\temp\ListDownloadBraun.csv"
+    }
+    if(Test-Path -Path "C:\temp\XML")
+    {
+        Remove-Item "C:\temp\XML"
+    }
+    $listIconsPath = Get-ChildItem "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Microsoft Office 20*" 
+    foreach ( $item in $listIconsPath ) 
+    {
+        if($item.Extension -eq "lnk")
+        {
+
+            Remove-Item $Item.FullName
+        }
+    }
+}
+
 function Download2
 {param($Source,$Ouput)
 
@@ -714,38 +780,9 @@ $Project | Add-Member -type NoteProperty -name XMLDIRECTORY -Value "$XmlDirector
 $Project | Add-Member -type NoteProperty -name LISTDOWNLOAD -Value  "$WorkDirectory\$listDownload"
 
 $ListFiles = downlaodGitHub
+
 #Check if powershell5.1 is there, if not install, create task and proceed uninstall
 CallStep -Project $Project -ListFiles $ListFiles
 CallStep -Project $Project -ListFiles $ListFiles
 CallStep -Project $Project -ListFiles $ListFiles
 #endregion
-
-function DeleteStuff
-{param($ListFiles)
-    foreach($file in $ListFiles)
-    {
-        $item = $file.FULLPATH
-        if(test-path $item){Remove-Item -Path $item}
-    }
-    if(Test-Path -Path "C:\temp\Remove-PreviousOfficeInstalls")
-    {
-        Get-ChildItem "C:\temp\Remove-PreviousOfficeInstalls" | Remove-Item 
-        Remove-Item "C:\temp\Remove-PreviousOfficeInstalls"
-    }
-    if(Test-Path -Path "C:\temp\ListDownloadBraun.csv")
-    {
-        Remove-Item "C:\temp\ListDownloadBraun.csv"
-    }
-    if(Test-Path -Path "C:\temp\XML")
-    {
-        Remove-Item "C:\temp\XML"
-    }
-    $listIconsPath = Get-ChildItem "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Microsoft Office 20*" 
-    foreach ( $item in $listIconsPath ) 
-    {
-        if($item.Extension -eq "lnk")
-        {
-            Remove-Item $Item.FullName
-        }
-    }
-}
