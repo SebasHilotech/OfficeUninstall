@@ -461,7 +461,7 @@ function incrementReboot
 }
 function Reboot
 {
-    Restart-Computer -Force
+    Restart-Computer -Force -Wait
 }
 function GetStep
 {param($Project)
