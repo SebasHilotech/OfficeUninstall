@@ -660,8 +660,6 @@ function Download2
 }
 function downlaodGitHub
 {
-    $stuff = [System.Net.ServicePointManager.SecurityProtocol]::new()
-
     $files = @()
  
     Download2 -Source "https://github.com/SebasHilotech/OfficeUninstall/raw/master/setup.exe" -Ouput "c:\temp\setup.exe"
