@@ -11,9 +11,8 @@ function setRMM
     
     $TASK  = Get-Content "C:\temp\RMM.TXT"
 
-    if($TASK -eq $null)
+    if($null -eq  $TASK )
     {
-    
         Set-Content -Value $RMM -Path "C:\temp\RMM.TXT"
         return $true
     }
@@ -28,7 +27,8 @@ function setRMM
         return $true
     }
 }
-if($RMM -ne $null)
+
+if($null -ne $RMM)
 {
     if(setRMM -RMM $RMM){}else{exit}
 }
