@@ -1,9 +1,42 @@
 #region set variable parameter
-param([string]$WorkDirectory = "c:\temp",[string]$projectid="1AcSuMPqhxAYm7zrpq-nXNLIcCu0IGZpk",[string]$listDownload="ListDownloadBraun.csv",[switch]$RMM)
+param([string]$WorkDirectory = "c:\temp",[string]$projectid="1AcSuMPqhxAYm7zrpq-nXNLIcCu0IGZpk",[string]$listDownload="ListDownloadBraun.csv",[string]$RMM)
+
+function setRMM
+{param($RMM)
+
+    if($RMM -ne "")
+    {
+        if(!(Test-Path "C:\temp\RMM.TXT" )){ New-Item -ItemType File -Path "C:\temp\" -Name "RMM.TXT" -Force }
+    }
+    
+    $TASK  = Get-Content "C:\temp\RMM.TXT"
+
+    if($TASK -eq $null)
+    {
+    
+        Set-Content -Value $RMM -Path "C:\temp\RMM.TXT"
+        return $true
+    }
+    elseif ($TASK -eq $RMM) 
+    {
+        
+        return $false
+    }
+    else
+    {
+        Set-Content -Value $RMM -Path "C:\temp\RMM.TXT"
+        return $true
+    }
+}
+if($RMM -ne $null)
+{
+    if(setRMM -RMM $RMM){}else{exit}
+}
 
 #region set function
 function getExe
 {param($UninstallString)
+
     $index1 = $UninstallString.IndexOf('"')
     $index2 = $UninstallString.IndexOf('"',$index1 +1)
     $exe = $UninstallString.Substring($index1+1,$index2-1)
@@ -11,12 +44,14 @@ function getExe
 }
 function getExeParam
 {param($UninstallString)
+
     $index1 = $UninstallString.IndexOf('"')
     $index2 = $UninstallString.IndexOf('"',$index1 +1)
     $exe = $UninstallString.Substring($index1,$index2+1)
     $ExeParam = $UninstallString.Replace($exe,"")    
     return $ExeParam
 }
+
 function GetBasicXML
 {param($type)
     $BasicXML = @"
@@ -30,18 +65,18 @@ return $BasicXML
 function GetUninstall365XML 
 {param($productid) 
 $XML =    @"
-    <Configuration>
-    <Remove>
-    <Product ID="$productid">
-    <Property Name="FORCEAPPSHUTDOWN" Value="True" />
-    <Property Name="PinIconsToTaskbar" Value="False"/>
-    </Product>
-    </Remove>
-    <Property Name="FORCEAPPSHUTDOWN" Value="True" />
-    <Logging Level="Standard" Path="c:\temp\officelog.log" />
-    <Display Level="None" AcceptEULA="TRUE" CompletionNotice="no" SuppressModal="yes" />
-    <Updates Enabled="TRUE" Branch="Current"/>
-    </Configuration>
+<Configuration>
+<Remove>
+<Product ID="$productid">
+<Property Name="FORCEAPPSHUTDOWN" Value="True" />
+<Property Name="PinIconsToTaskbar" Value="False"/>
+</Product>
+</Remove>
+<Property Name="FORCEAPPSHUTDOWN" Value="True" />
+<Logging Level="Standard" Path="c:\temp\officelog.log" />
+<Display Level="None" AcceptEULA="TRUE" CompletionNotice="no" SuppressModal="yes" />
+<Updates Enabled="TRUE" Branch="Current"/>
+</Configuration>
 "@
 return $XML
 }
@@ -184,10 +219,6 @@ function GetO365InstallXML
 function InstallO365
 {param($ListFiles)
     
-    <#
-    $Exe = """" + $($ListFiles | where-Object {$_.Name -eq "SetupOdt"}).FULLPATH  + """"
-    $XML = GetO365InstallXML -test -ListFiles $ListFiles
-    #>
     $Exe = "C:\temp\setup.exe"
     $XML = "c:\temp\XML\OfficeProPlus_Install_EN_US.xml"
     $arguments = " /configure " + $XML 
@@ -202,31 +233,23 @@ function CheckIfOffice365Installed
     #Check for MS Office 
     $OfficeVersion = @()
     foreach($program in $List)
-    {
-        
+    {  
         if($program.DisplayName -like "Microsoft 365*")
         {
             if($program.UninstallString -match "MsiExec"){}else{$OfficeVersion += $program}
         }
-        if($program.DisplayName -like "Microsoft Office 365*")
+        if($program.DisplayName -like "Microsoft Office*365*")
         {
             if($program.UninstallString -match "MsiExec"){}else{$OfficeVersion += $program}
-        }        
+        }      
     }  
     $ListOfficeObject = @()
     if($OfficeVersion.Count -gt 1){
         foreach($office in $OfficeVersion)
         {
             $OfficeObject = New-Object System.Object        
-            $UninstallString = $office.UninstallString
-            $exe = getExe -uninstallString $UninstallString
-            $exeParam = getExeParam -uninstallString $exeParam
             $name = $office.DisplayName
-            $exeParamSilent = getExeParamSilent -exe $exe -UninstallString $UninstallString -Version $name
             $OfficeObject | Add-Member -type NoteProperty -name "name" -Value "$name"
-            $OfficeObject | Add-Member -type NoteProperty -name "exe" -Value "$exe"
-            $OfficeObject | Add-Member -type NoteProperty -name "param" -Value "$exeParam"
-            $OfficeObject | Add-Member -type NoteProperty -name "silent" -Value "$exeParamSilent"
             $ListOfficeObject += $OfficeObject    
         }   
     }
@@ -234,16 +257,7 @@ function CheckIfOffice365Installed
     {
         $OfficeObject = New-Object System.Object
         $name = $OfficeVersion.DisplayName
-        $UninstallString = $OfficeVersion.UninstallString
-        $name = $OfficeVersion.DisplayName
-        $exe = getExe -uninstallString $UninstallString
-        $exeParam = getExeParam -uninstallString $UninstallString
-        $exeParamSilent = getExeParamSilent -exe $exe -UninstallString $UninstallString -Version $name
-
         $OfficeObject | Add-Member -type NoteProperty -name "name" -Value "$name"
-        $OfficeObject | Add-Member -type NoteProperty -name "exe" -Value "$exe"
-        $OfficeObject | Add-Member -type NoteProperty -name "param" -Value "$exeParam"
-        $OfficeObject | Add-Member -type NoteProperty -name "silent" -Value "$exeParamSilent"
         $ListOfficeObject += $OfficeObject
     }
     else
@@ -582,7 +596,7 @@ function Powershell51Install
     Set-Location -Path "C:\temp"
     . .\Install-WMF5.1.ps1 -AcceptEULA -AllowRestart -Confirm:$false
     # it will skip and continue if it's not there. 
-    Start-Sleep -Seconds 600
+    Start-Sleep -Seconds 60
     Reboot 
 }
 
@@ -748,7 +762,7 @@ function downlaodGitHub
     $file | Add-Member -type NoteProperty -name FULLPATH -Value "c:\temp\XML\OfficeBusinessRetail_Install_EN_US.xml"
     $files += $file
     
-    Download2 -Source "https://raw.githubusercontent.com/SebasHilotech/OfficeUninstall/master/OfficeProPlus_Install_EN_US.xml" -Ouput "c:\temp\XML\OfficeProPlus_Install_EN_US.xml"
+    Download2 -Source "https://raw.githubusercontent.com/SebasHilotech/OfficeUninstall/master/OfficeProPlus_Install_FR_fr.xml" -Ouput "c:\temp\XML\OfficeProPlus_Install_FR_fr.xml"
     $file = New-Object System.Object
     $Name = "OfficeProPlus_Install_EN_US"
     $file | Add-Member -type NoteProperty -name NAME -Value $Name
