@@ -198,24 +198,6 @@ function UninstallOffice
 
     return $state
 }
-function GetO365InstallXML
-{param($ListFiles,[switch]$test)
-
-    $user = GetLocalUser
-    if($test){$user = "vlare"}
-    $licence = $(import-csv -path $($ListFiles | Where-Object {$_.NAME -eq "ListUserInstallation"}).FULLPATH -Encoding utf8 | where-Object {$_.user -like $user}).'New Office Licence'
-    switch ($licence) {
-        "ENTERPRISEPACK" 
-        {
-            $XMLPath =    $($ListFiles | where-Object {$_.NAME -like "OfficeProPlus_install_EN_US"}).FULLPATH
-        }
-        "O365_BUSINESS_PREMIUM"
-        {   
-            $XMLPath =    $($ListFiles | where-Object {$_.NAME -like "OfficeBusinessRetail_Install_EN_US"}).FULLPATH
-        }
-    }
-    return $XMLPath
-}
 function InstallO365
 {param($ListFiles)
     
