@@ -202,7 +202,7 @@ function InstallO365
 {param($ListFiles)
     
     $Exe = "C:\temp\setup.exe"
-    $XML = "c:\temp\XML\OfficeProPlus_Install_EN_US.xml"
+    $XML = "c:\temp\XML\OfficeProPlus_Install_FR_fr.xml"
     $arguments = " /configure " + $XML 
     start-process $Exe -args $arguments -Wait -NoNewWindow
 
