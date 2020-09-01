@@ -1,4 +1,6 @@
 #powershell
+
+
 function CheckIfOffice365Installed
 {
     $List32 = Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName, UninstallString | Where-Object {$_.DisplayName -like "*microsoft*"}
@@ -63,5 +65,3 @@ $XML = "c:\temp\XML\OfficeProPlus_Install_FR_fr.xml"
 $arguments = " /configure " + $XML 
 
 start-process $Exe -args $arguments -Wait -NoNewWindow
-
-CheckIfOffice365Installed
