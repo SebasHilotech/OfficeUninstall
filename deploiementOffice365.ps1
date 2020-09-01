@@ -627,7 +627,8 @@ switch($step)
             IncrementStep -Project $Project 
             Reboot
         }
-
+        $OfficeObject = GetOfficeVersion
+        UninstallOffice -OfficeObject $OfficeObject
         IncrementStep -Project $Project 
         
     }
