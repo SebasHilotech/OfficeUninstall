@@ -629,7 +629,7 @@ switch($step)
         {
             OPUninstall
             IncrementStep -Project $Project 
-            Reboot
+            #Reboot
         }
         
         $OfficeObject = GetOfficeVersion
@@ -660,7 +660,7 @@ switch($step)
 
         IncrementStep -Project $Project  
 
-        Reboot     
+        #Reboot     
 
     }
     "3"
@@ -805,6 +805,7 @@ $Project | Add-Member -type NoteProperty -name LISTDOWNLOAD -Value  "$WorkDirect
 $ListFiles = downlaodGitHub
 
 #Check if powershell5.1 is there, if not install, create task and proceed uninstall
+CallStep -Project $Project -ListFiles $ListFiles
 CallStep -Project $Project -ListFiles $ListFiles
 CallStep -Project $Project -ListFiles $ListFiles
 CallStep -Project $Project -ListFiles $ListFiles
