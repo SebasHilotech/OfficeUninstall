@@ -1,42 +1,9 @@
 #region set variable parameter
-param([string]$WorkDirectory = "c:\temp",[string]$projectid="1AcSuMPqhxAYm7zrpq-nXNLIcCu0IGZpk",[string]$listDownload="ListDownloadBraun.csv",[string]$RMM)
-
-function setRMM
-{param($RMM)
-
-    if($RMM -ne "")
-    {
-        if(!(Test-Path "C:\temp\RMM.TXT" )){ New-Item -ItemType File -Path "C:\temp\" -Name "RMM.TXT" -Force }
-    }
-    
-    $TASK  = Get-Content "C:\temp\RMM.TXT"
-
-    if($null -eq  $TASK )
-    {
-        Set-Content -Value $RMM -Path "C:\temp\RMM.TXT"
-        return $true
-    }
-    elseif ($TASK -eq $RMM) 
-    {
-        
-        return $false
-    }
-    else
-    {
-        Set-Content -Value $RMM -Path "C:\temp\RMM.TXT"
-        return $true
-    }
-}
-
-if($null -ne $RMM)
-{
-    if(setRMM -RMM $RMM){}else{exit}
-}
+param([string]$WorkDirectory = "c:\temp",[string]$projectid="1AcSuMPqhxAYm7zrpq-nXNLIcCu0IGZpk",[string]$listDownload="ListDownloadBraun.csv")
 
 #region set function
 function getExe
 {param($UninstallString)
-
     $index1 = $UninstallString.IndexOf('"')
     $index2 = $UninstallString.IndexOf('"',$index1 +1)
     $exe = $UninstallString.Substring($index1+1,$index2-1)
@@ -44,14 +11,12 @@ function getExe
 }
 function getExeParam
 {param($UninstallString)
-
     $index1 = $UninstallString.IndexOf('"')
     $index2 = $UninstallString.IndexOf('"',$index1 +1)
     $exe = $UninstallString.Substring($index1,$index2+1)
     $ExeParam = $UninstallString.Replace($exe,"")    
     return $ExeParam
 }
-
 function GetBasicXML
 {param($type)
     $BasicXML = @"
@@ -65,18 +30,18 @@ return $BasicXML
 function GetUninstall365XML 
 {param($productid) 
 $XML =    @"
-<Configuration>
-<Remove>
-<Product ID="$productid">
-<Property Name="FORCEAPPSHUTDOWN" Value="True" />
-<Property Name="PinIconsToTaskbar" Value="False"/>
-</Product>
-</Remove>
-<Property Name="FORCEAPPSHUTDOWN" Value="True" />
-<Logging Level="Standard" Path="c:\temp\officelog.log" />
-<Display Level="None" AcceptEULA="TRUE" CompletionNotice="no" SuppressModal="yes" />
-<Updates Enabled="TRUE" Branch="Current"/>
-</Configuration>
+    <Configuration>
+    <Remove>
+    <Product ID="$productid">
+    <Property Name="FORCEAPPSHUTDOWN" Value="True" />
+    <Property Name="PinIconsToTaskbar" Value="False"/>
+    </Product>
+    </Remove>
+    <Property Name="FORCEAPPSHUTDOWN" Value="True" />
+    <Logging Level="Standard" Path="c:\temp\officelog.log" />
+    <Display Level="None" AcceptEULA="TRUE" CompletionNotice="no" SuppressModal="yes" />
+    <Updates Enabled="TRUE" Branch="Current"/>
+    </Configuration>
 "@
 return $XML
 }
@@ -198,14 +163,31 @@ function UninstallOffice
 
     return $state
 }
+function GetO365InstallXML
+{param($ListFiles,[switch]$test)
+
+    $user = GetLocalUser
+    if($test){$user = "vlare"}
+    $licence = $(import-csv -path $($ListFiles | Where-Object {$_.NAME -eq "ListUserInstallation"}).FULLPATH -Encoding utf8 | where-Object {$_.user -like $user}).'New Office Licence'
+    switch ($licence) {
+        "ENTERPRISEPACK" 
+        {
+            $XMLPath =    $($ListFiles | where-Object {$_.NAME -like "OfficeProPlus_install_EN_US"}).FULLPATH
+        }
+        "O365_BUSINESS_PREMIUM"
+        {   
+            $XMLPath =    $($ListFiles | where-Object {$_.NAME -like "OfficeBusinessRetail_Install_EN_US"}).FULLPATH
+        }
+    }
+    return $XMLPath
+}
 function InstallO365
 {param($ListFiles)
-    
-    $Exe = "C:\temp\setup.exe"
-    $XML = "C:\temp\XML\Office365_FR_FR32.xml"
+    $Exe = """" + $($ListFiles | where-Object {$_.Name -eq "SetupOdt"}).FULLPATH  + """"
+    $XML = GetO365InstallXML -test -ListFiles $ListFiles
     $arguments = " /configure " + $XML 
+    
     start-process $Exe -args $arguments -Wait -NoNewWindow
-
 }
 function CheckIfOffice365Installed
 {
@@ -215,23 +197,26 @@ function CheckIfOffice365Installed
     #Check for MS Office 
     $OfficeVersion = @()
     foreach($program in $List)
-    {  
+    {
         if($program.DisplayName -like "Microsoft 365*")
         {
             if($program.UninstallString -match "MsiExec"){}else{$OfficeVersion += $program}
-        }
-        if($program.DisplayName -like "Microsoft Office*365*")
-        {
-            if($program.UninstallString -match "MsiExec"){}else{$OfficeVersion += $program}
-        }      
+        }        
     }  
     $ListOfficeObject = @()
     if($OfficeVersion.Count -gt 1){
         foreach($office in $OfficeVersion)
         {
             $OfficeObject = New-Object System.Object        
+            $UninstallString = $office.UninstallString
+            $exe = getExe -uninstallString $UninstallString
+            $exeParam = getExeParam -uninstallString $exeParam
             $name = $office.DisplayName
+            $exeParamSilent = getExeParamSilent -exe $exe -UninstallString $UninstallString -Version $name
             $OfficeObject | Add-Member -type NoteProperty -name "name" -Value "$name"
+            $OfficeObject | Add-Member -type NoteProperty -name "exe" -Value "$exe"
+            $OfficeObject | Add-Member -type NoteProperty -name "param" -Value "$exeParam"
+            $OfficeObject | Add-Member -type NoteProperty -name "silent" -Value "$exeParamSilent"
             $ListOfficeObject += $OfficeObject    
         }   
     }
@@ -239,7 +224,16 @@ function CheckIfOffice365Installed
     {
         $OfficeObject = New-Object System.Object
         $name = $OfficeVersion.DisplayName
+        $UninstallString = $OfficeVersion.UninstallString
+        $name = $OfficeVersion.DisplayName
+        $exe = getExe -uninstallString $UninstallString
+        $exeParam = getExeParam -uninstallString $UninstallString
+        $exeParamSilent = getExeParamSilent -exe $exe -UninstallString $UninstallString -Version $name
+
         $OfficeObject | Add-Member -type NoteProperty -name "name" -Value "$name"
+        $OfficeObject | Add-Member -type NoteProperty -name "exe" -Value "$exe"
+        $OfficeObject | Add-Member -type NoteProperty -name "param" -Value "$exeParam"
+        $OfficeObject | Add-Member -type NoteProperty -name "silent" -Value "$exeParamSilent"
         $ListOfficeObject += $OfficeObject
     }
     else
@@ -315,7 +309,6 @@ function GetLocalUser
                     {
                         $array= ([ordered]@{
                             'User' = $b[0]
-                            'ID'   = $b[2]
                             'Date' = $b[4]
                             'Time' = $b[5..6] -join ' '})
 
@@ -325,7 +318,6 @@ function GetLocalUser
                     { 
                         $array= ([ordered]@{
                         'User' = $b[0]
-                        'ID'   = $b[2]
                         'Date' = $b[5]
                         'Time' = $b[6..7] -join ' '
                     })
@@ -333,9 +325,8 @@ function GetLocalUser
             }
         }
     }
-    return $result
+    return $result.User
 }
-GetLocalUser
 function Expand-ZIPFile($file, $destination)
 {
     $shell = new-object -com shell.application
@@ -347,17 +338,13 @@ function Expand-ZIPFile($file, $destination)
 }
 function Download
 {param($id,$DownloadPath)
-    $WebClient = New-Object System.Net.WebClient 
-    [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls11 -bor [System.Net.SecurityProtocolType]::Tls12 
-    $url = "https://github.com/SebasHilotech/Production/blob/master/Remove-PreviousOfficeInstalls.zip"  
+    $WebClient = New-Object System.Net.WebClient    
     $url = "https://drive.google.com/uc?id=" + $id + "&export=download"
-    $DownloadPath = "C:\temp\Remove-PreviousOfficeInstalls.zip"
     $WebClient.DownloadFile($url,$DownloadPath)       
     $WebClient.Dispose()
 }
 function GetFile
 {param($Project)
-
     $ListDownloadPath = $Project.LISTDOWNLOAD
     $workdirectory    = $Project.WORKFOLDER
     $XmlDirectory     = $Project.XMLDIRECTORY
@@ -459,17 +446,14 @@ function incrementReboot
     return $allowReboot
 }
 function Reboot
-{
-    Restart-Computer -Force -Wait
-    Start-Sleep -Seconds 60
+{param($Project)
+    Restart-Computer
 }
 function GetStep
 {param($Project)
-
     $WorkFolder = $Project.WORKFOLDER
     $stepfile = "step.ini"
     $stepfileFullName = $WorkFolder + "\" + $stepfile
-    
     if(!(Test-Path $stepfileFullName ))
     { 
         New-Item -ItemType File -Path $WorkDirectory -Name $stepfile  -Force | Out-Null
@@ -575,224 +559,32 @@ function IsPowershell51
 function Powershell51Install
 {
     $WebClient = New-Object System.Net.WebClient    
-    [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls11 -bor [System.Net.SecurityProtocolType]::Tls12 
     $WebClient.DownloadFile("http://download.microsoft.com/download/6/F/5/6F5FF66C-6775-42B0-86C4-47D41F2DA187/Win7AndW2K8R2-KB3191566-x64.zip","C:\temp\Win7AndW2K8R2-KB3191566-x64.zip")       
     Expand-ZIPFile -file "C:\temp\Win7AndW2K8R2-KB3191566-x64.zip" -destination "c:\temp\"
     Remove-Item -Path "C:\temp\Win7AndW2K8R2-KB3191566-x64.zip" 
     Set-Location -Path "C:\temp"
     . .\Install-WMF5.1.ps1 -AcceptEULA -AllowRestart -Confirm:$false
     # it will skip and continue if it's not there. 
-    Start-Sleep -Seconds 60
-    Reboot 
+    exit
+    
+    #Start-Sleep -Seconds 
 }
 
 function OPUninstall
 {
-    #Download -id "1ClipcaQFlHLkZjc7Wj0zS8-8LAbk41xn" -DownloadPath "c:\temp\Remove-PreviousOfficeInstalls.zip"
-    $WebClient = New-Object System.Net.WebClient
-    $url = "https://github.com/SebasHilotech/OfficeUninstall/raw/master/Remove-PreviousOfficeInstalls.zip"
-    [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls11 -bor [System.Net.SecurityProtocolType]::Tls12
-    $WebClient.DownloadFile($url,"c:\temp\Remove-PreviousOfficeInstalls.zip")
-
+    Download -id "1ClipcaQFlHLkZjc7Wj0zS8-8LAbk41xn" -DownloadPath "c:\temp\Remove-PreviousOfficeInstalls.zip"
     #expand-archive -path "c:\temp\Remove-PreviousOfficeInstalls.zip" -DestinationPath "C:\temp\" 
     Expand-ZIPFile -file "c:\temp\Remove-PreviousOfficeInstalls.zip" -destination "C:\temp\"
     Remove-Item "c:\temp\Remove-PreviousOfficeInstalls.zip" 
     Set-Location -path  "C:\temp\Remove-PreviousOfficeInstalls"
-    
     . .\Remove-PreviousOfficeInstalls.ps1 -ProductsToRemove MainOfficeProduct -Quiet:$true -Force:$true -Remove2016Installs:$true 
-
     Remove-PreviousOfficeInstalls
-
 }
 
-function CallStep
-{param($Project,$ListFiles)
+$OfficeObject = GetOfficeVersion
 
-$step = GetStep -Project $Project
+UninstallOffice -OfficeObject $OfficeObject 
 
-switch($step)
-{
-    "0"
-    {
-        CreateTaskMigration
-        IncrementStep -Project $Project
-        if(!(IsPowershell51))
-        {
-            Powershell51Install
-        }
-    }
-    "1"
-    {
+OPUninstall
 
-        $OfficeObject = CheckIfOfficeStillInstalled
-        if($OfficeObject -ne $false)
-        {
-            OPUninstall
-            IncrementStep -Project $Project 
-            Reboot
-        }
-        
-        $OfficeObject = GetOfficeVersion
-        $ListUser = GetLocalUser
-        $ID = $ListUser.ID
-        logoff $ID
-         
-        UninstallOffice -OfficeObject $OfficeObject
-        IncrementStep -Project $Project 
-        
-    }
-    "2"
-    {
-
-        $result  = CheckIfOffice365Installed
-        $OfficeObject = GetOfficeVersion
-        $ListUser = GetLocalUser
-        $ID = $ListUser.ID
-        logoff $ID
-        UninstallOffice -OfficeObject $OfficeObject
-        if($result -eq $false)
-        {
-
-            #Install Microsoft Office 365
-            InstallO365 -ListFiles $ListFiles
-        
-        }
-
-        IncrementStep -Project $Project  
-
-        Reboot     
-
-    }
-    "3"
-    {
-
-        $result  = CheckIfOffice365Installed
-
-        if($result -eq $false)
-        {
-
-            InstallO365 -ListFiles $ListFiles
-
-        }
-
-        $result  = CheckIfOffice365Installed
-        
-        if($result -eq $false)
-        {
-
-            Reboot    
-
-        }
-        else
-        {
-
-            DeleteTaskMigration
-
-            DeleteStuff -ListFiles $ListFiles
-
-        }
-    }
-    Default
-    {
-        # if something else, delete the task
-        DeleteTaskMigration
-
-    }
-  }
-}
-function DeleteStuff
-{param($ListFiles)
-    foreach($file in $ListFiles)
-    {
-        $item = $file.FULLPATH
-        if(test-path $item){Remove-Item -Path $item}
-    }
-    if(Test-Path -Path "C:\temp\Remove-PreviousOfficeInstalls")
-    {
-        Get-ChildItem "C:\temp\Remove-PreviousOfficeInstalls" | Remove-Item 
-        Remove-Item "C:\temp\Remove-PreviousOfficeInstalls"
-    }
-    if(Test-Path -Path "C:\temp\ListDownloadBraun.csv")
-    {
-        Remove-Item "C:\temp\ListDownloadBraun.csv"
-    }
-    if(Test-Path -Path "C:\temp\XML")
-    {
-        Remove-Item "C:\temp\XML"
-    }
-    $listIconsPath = Get-ChildItem "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Microsoft Office 20*" 
-    foreach ( $item in $listIconsPath ) 
-    {
-        if($item.Extension -eq "lnk")
-        {
-
-            Remove-Item $Item.FullName
-        }
-    }
-}
-
-function Download2
-{param($Source,$Ouput)
-
-    $WebClient = New-Object System.Net.WebClient
-    [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls11 -bor [System.Net.SecurityProtocolType]::Tls12
-    $WebClient.DownloadFile($Source,$Ouput)
-    $WebClient.Dispose()
-
-}
-function downlaodGitHub
-{
-    $files = @()
- 
-    Download2 -Source "https://github.com/SebasHilotech/OfficeUninstall/raw/master/setup.exe" -Ouput "c:\temp\setup.exe"
-    $file = New-Object System.Object
-    $Name = "ODT"
-    $file | Add-Member -type NoteProperty -name NAME -Value "$Name"
-    $file | Add-Member -type NoteProperty -name FULLPATH -Value "c:\temp\setup.exe"
-    $files += $file
-
-    Download2 -Source "https://github.com/SebasHilotech/OfficeUninstall/raw/master/OfficeBusinessRetail_Install_EN_US.xml" -Ouput "c:\temp\XML\OfficeBusinessRetail_Install_EN_US.xml"
-    $file = New-Object System.Object
-    $Name = "OfficeBusinessRetail_Install_EN_US"
-    $file | Add-Member -type NoteProperty -name NAME -Value $Name
-    $file | Add-Member -type NoteProperty -name FULLPATH -Value "c:\temp\XML\OfficeBusinessRetail_Install_EN_US.xml"
-    $files += $file
-    
-    Download2 -Source "https://raw.githubusercontent.com/SebasHilotech/OfficeUninstall/master/OfficeProPlus_Install_FR_fr.xml" -Ouput "c:\temp\XML\OfficeProPlus_Install_FR_fr.xml"
-    $file = New-Object System.Object
-    $Name = "OfficeProPlus_Install_EN_US"
-    $file | Add-Member -type NoteProperty -name NAME -Value $Name
-    $file | Add-Member -type NoteProperty -name FULLPATH -Value "c:\temp\XML\OfficeProPlus_Install_EN_US.xml"
-    $files += $file
-    
-    Download2 -Source "https://raw.githubusercontent.com/SebasHilotech/OfficeUninstall/master/deploiementOffice365.ps1" -Ouput "c:\temp\deploiementOffice365.ps1"
-    $file = New-Object System.Object
-    $Name = "deploiementOffice365"
-    $file | Add-Member -type NoteProperty -name NAME -Value $Name
-    $file | Add-Member -type NoteProperty -name FULLPATH -Value "c:\temp\deploiementOffice365.ps1"
-    $files += $file
-    
-    return $files    
-}
-#endregion
-
-
-#region set variable, folder and run
-$XmlDirectory = "$WorkDirectory\XML"
-if(!(Test-Path $XmlDirectory )){ New-Item -ItemType directory -Path $WorkDirectory -Name "XML" -Force }
-
-
-#Set object for function
-$Project = New-Object System.Object
-$Project | Add-Member -type NoteProperty -name CSVPROJECT -Value "$projectid"
-$Project | Add-Member -type NoteProperty -name WORKFOLDER -Value "$WorkDirectory"
-$Project | Add-Member -type NoteProperty -name XMLDIRECTORY -Value "$XmlDirectory"
-$Project | Add-Member -type NoteProperty -name LISTDOWNLOAD -Value  "$WorkDirectory\$listDownload"
-
-$ListFiles = downlaodGitHub
-
-#Check if powershell5.1 is there, if not install, create task and proceed uninstall
-CallStep -Project $Project -ListFiles $ListFiles
-CallStep -Project $Project -ListFiles $ListFiles
-CallStep -Project $Project -ListFiles $ListFiles
-#endregion
+& C:\temp\setup.exe /configure C:\temp\Office365_FR_FR32.xml
