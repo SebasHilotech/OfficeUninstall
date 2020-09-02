@@ -460,8 +460,8 @@ function incrementReboot
 }
 function Reboot
 {
-    Restart-Computer -Force -Wait
-    Start-Sleep -Seconds 60
+    Restart-Computer -Force 
+    Start-Sleep -Seconds 90
 }
 function GetStep
 {param($Project)
