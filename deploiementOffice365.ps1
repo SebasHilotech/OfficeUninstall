@@ -30,7 +30,9 @@ function setRMM
 
 if($null -ne $RMM)
 {
-    if(setRMM -RMM $RMM){}else{exit}
+    if(setRMM -RMM $RMM){}else{
+    #exit
+    }
 }
 
 #region set function
@@ -637,10 +639,19 @@ switch($step)
         $ListUser = GetLocalUser
         $ID = $ListUser.ID
         logoff $ID
-         
-        UninstallOffice -OfficeObject $OfficeObject
+        if($OfficeObject -gt 1)
+        {
+            
+            foreach($office in $OfficeObject ){
+                UninstallOffice -OfficeObject $OfficeObject
+            }
+        }
+        else
+        {
+                UninstallOffice -OfficeObject $OfficeObject
+        }
         IncrementStep -Project $Project 
-        
+
     }
     "2"
     {
