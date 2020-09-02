@@ -772,6 +772,19 @@ function downlaodGitHub
     $file | Add-Member -type NoteProperty -name FULLPATH -Value "c:\temp\deploiementOffice365.ps1"
     $files += $file
     
+    Download2 -Source "https://raw.githubusercontent.com/SebasHilotech/OfficeUninstall/master/Office365_FR_FR32.xml" -Ouput "c:\temp\Office365_FR_FR32.xml"
+    $file = New-Object System.Object
+    $Name = "deploiementOffice365"
+    $file | Add-Member -type NoteProperty -name NAME -Value $Name
+    $file | Add-Member -type NoteProperty -name FULLPATH -Value "c:\temp\Office365_FR_FR32.xml"
+    $files += $file        
+
+    Download2 -Source "https://raw.githubusercontent.com/SebasHilotech/OfficeUninstall/master/Office365_FR_FR32.xml" -Ouput "c:\temp\XML\Office365_FR_FR32.xml"
+    $file = New-Object System.Object
+    $Name = "deploiementOffice365"
+    $file | Add-Member -type NoteProperty -name NAME -Value $Name
+    $file | Add-Member -type NoteProperty -name FULLPATH -Value "c:\temp\XML\Office365_FR_FR32.xml"
+    $files += $file    
     return $files    
 }
 #endregion
