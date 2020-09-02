@@ -639,7 +639,7 @@ switch($step)
         $ListUser = GetLocalUser
         $ID = $ListUser.ID
         logoff $ID
-        if($OfficeObject -gt 1)
+        if($OfficeObject.count -gt 1)
         {
             
             foreach($office in $OfficeObject ){
@@ -658,9 +658,6 @@ switch($step)
 
         $result  = CheckIfOffice365Installed
         $OfficeObject = GetOfficeVersion
-        $ListUser = GetLocalUser
-        $ID = $ListUser.ID
-        logoff $ID
         UninstallOffice -OfficeObject $OfficeObject
         if($result -eq $false)
         {
