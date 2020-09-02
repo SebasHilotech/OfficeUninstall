@@ -30,7 +30,7 @@ function setRMM
 
 if($null -ne $RMM)
 {
-    if(setRMM -RMM $RMM){}else{exit}
+    if(setRMM -RMM $RMM){}else{#exit}
 }
 
 #region set function
