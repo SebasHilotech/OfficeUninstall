@@ -13,7 +13,7 @@ function setRMM
 
     if($null -eq  $TASK )
     {
-        Set-Content -Value $RMM -Path "C:\temp\RMM.TXT"
+        #Set-Content -Value $RMM -Path "C:\temp\RMM.TXT"
         return $true
     }
     elseif ($TASK -eq $RMM) 
@@ -148,7 +148,8 @@ function GetOfficeVersion
             $OfficeObject = New-Object System.Object        
             $UninstallString = $office.UninstallString
             $exe = getExe -uninstallString $UninstallString
-            $exeParam = getExeParam -uninstallString $exeParam
+            $exeParam = getExeParam -uninstallString $UninstallString
+
             $name = $office.DisplayName
             $exeParamSilent = getExeParamSilent -exe $exe -UninstallString $UninstallString -Version $name
             $OfficeObject | Add-Member -type NoteProperty -name "name" -Value "$name"
