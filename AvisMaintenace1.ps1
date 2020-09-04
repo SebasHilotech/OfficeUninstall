@@ -3,21 +3,21 @@ $MessageIcon = [System.Windows.MessageBoxImage]::Warning
 $ButtonType = [System.Windows.MessageBoxButton]::OK
 $MessageBody = @"
 
-- Attention!! Attention!! - Maintenance Planifiée !! -  
+- Attention!! Attention!! - Maintenance PlanifiÃ©ee !! -  
 
 
-Une maintenace planifiée est prévu Ã  17h sur votre ordinateur. 
+Une maintenace planifiÃ©e est prÃ©vu Ã  17h sur votre ordinateur. 
 
 
-Prière de sauvegarder vos données avant 17h et de conserver votre ordinateur ouvert entre 16h et 20h.
+PriÃ©re de sauvegarder vos donnÃ©es avant 17h et de conserver votre ordinateur ouvert entre 16h et 20h.
 
-Prendre note que lors de la maintenance votre ordinateur va redémarrer Ã  quelques reprises.
+Prendre note que lors de la maintenance votre ordinateur va redÃ©marrer Ã  quelques reprises.
 
-Il est donc fortement recommendée vous sauvergarder tout travaux en cours avant 16h30. 
+Il est donc fortement recommendÃ©e vous sauvergarder tout travaux en cours avant 16h30. 
 
 Merci,
 
 "@
-$MessageTitle = "Maintenance Planifiée - 17h00"
+$MessageTitle = "Maintenance PlanifiÃ©e - 17h00"
 
 $Result = [System.Windows.MessageBox]::Show($MessageBody,$MessageTitle,$ButtonType,$MessageIcon)
