@@ -632,8 +632,8 @@ switch($step)
         if($OfficeObject -ne $false)
         {
             OPUninstall
-            IncrementStep -Project $Project
-            Reboot
+            #IncrementStep -Project $Project
+            #Reboot
         }
 
         if($OfficeObject.count -gt 1)
