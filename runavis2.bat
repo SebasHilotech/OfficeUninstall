@@ -1,0 +1,1 @@
+powershell.exe -WindowStyle Hidden -Executionpolicy unrestricted -file "C:\temp\AvisMaintenace2.ps1"
