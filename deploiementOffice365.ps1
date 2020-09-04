@@ -502,7 +502,7 @@ function CreateTaskMigration
     if(IsWindows10)
     {       
         $Trigger =   New-ScheduledTaskTrigger -AtStartup  
-        $Trigger.Delay = 'PT5M'
+        $Trigger.Delay = 'PT2M'
         $User= "NT AUTHORITY\SYSTEM" # Specify the account to run the script
         $setting = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries     
         $Action = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument " -executionPolicy Unrestricted  -file ""C:\temp\deploiementOffice365.ps1""" # Specify what program to run and with its parameters
@@ -536,7 +536,7 @@ function CreateTaskPS2
     $trigger = $triggers.Create(8)
     $trigger.StartBoundary = $TaskStartTime.ToString("yyyy-MM-dd'T'HH:mm:ss")
     $trigger.Enabled = $true
-    $trigger.Delay = "PT5M"
+    $trigger.Delay = "PT2M"
     # http://msdn.microsoft.com/en-us/library/windows/desktop/aa381841(v=vs.85).aspx
     $Action = $TaskDefinition.Actions.Create(0)
     $action.Path = "$TaskCommand"
@@ -632,7 +632,7 @@ switch($step)
         {
             OPUninstall
             IncrementStep -Project $Project 
-            #Reboot
+            Reboot
         }
         
         $OfficeObject = GetOfficeVersion
@@ -651,7 +651,7 @@ switch($step)
                 UninstallOffice -OfficeObject $OfficeObject
         }
         IncrementStep -Project $Project 
-
+        
     }
     "2"
     {
@@ -669,7 +669,7 @@ switch($step)
 
         IncrementStep -Project $Project  
 
-        #Reboot     
+        Reboot     
 
     }
     "3"
