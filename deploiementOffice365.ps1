@@ -617,6 +617,10 @@ switch($step)
 {
     "0"
     {
+        $ListUser = GetLocalUser
+        $ID = $ListUser.ID
+        logoff $ID
+
         CreateTaskMigration
         IncrementStep -Project $Project
         if(!(IsPowershell51))
@@ -626,7 +630,9 @@ switch($step)
     }
     "1"
     {
-
+        $ListUser = GetLocalUser
+        $ID = $ListUser.ID
+        logoff $ID
         $OfficeObject = CheckIfOfficeStillInstalled
         if($OfficeObject -ne $false)
         {
@@ -635,10 +641,6 @@ switch($step)
             Reboot
         }
         
-        $OfficeObject = GetOfficeVersion
-        $ListUser = GetLocalUser
-        $ID = $ListUser.ID
-        logoff $ID
         if($OfficeObject.count -gt 1)
         {
             
@@ -674,7 +676,10 @@ switch($step)
     }
     "3"
     {
-
+        $ListUser = GetLocalUser
+        $ID = $ListUser.ID
+        logoff $ID
+        
         $result  = CheckIfOffice365Installed
 
         if($result -eq $false)
