@@ -688,7 +688,7 @@ switch($step)
 
         if($result -eq $false)
         {
-
+            IncrementStep -Project $Project
             Reboot
 
         }
@@ -698,8 +698,9 @@ switch($step)
             DeleteTaskMigration
 
             DeleteStuff -ListFiles $ListFiles
-
+            IncrementStep -Project $Project
         }
+        
     }
     Default
     {
