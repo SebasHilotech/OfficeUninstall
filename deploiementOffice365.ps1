@@ -1,6 +1,6 @@
 ﻿#region set variable parameter
 param([string]$WorkDirectory = "c:\temp",[string]$projectid="1AcSuMPqhxAYm7zrpq-nXNLIcCu0IGZpk",[string]$listDownload="ListDownloadBraun.csv")
-
+$ErrorActionPreference= 'silentlycontinue'
 function setRMM
 {param($RMM)
     if($RMM -ne "")
@@ -46,7 +46,7 @@ function getExeParam
     $index1 = $UninstallString.IndexOf('"')
     $index2 = $UninstallString.IndexOf('"',$index1 +1)
     $exe = $UninstallString.Substring($index1,$index2+1)
-    $ExeParam = $UninstallString.Replace($exe,"")
+    $ExeParam = $UninstallString.Replace($exe,"") 
     return $ExeParam
 }
 
@@ -332,7 +332,6 @@ function GetLocalUser
     }
     return $result
 }
-GetLocalUser
 function Expand-ZIPFile($file, $destination)
 {
     $shell = new-object -com shell.application
@@ -619,90 +618,74 @@ switch($step)
         logoff $ID
 
         CreateTaskMigration
-        IncrementStep -Project $Project
         if(!(IsPowershell51))
         {
             Powershell51Install
         }
+        IncrementStep -Project $Project
     }
     "1"
     {
         $ListUser = GetLocalUser
+       
         $ID = $ListUser.ID
+        
         logoff $ID
+
         $OfficeObject = CheckIfOfficeStillInstalled
+
+        if($OfficeObject -ne $false)
+        {
+            if($OfficeObject.count -gt 1)
+            {
+                foreach($office in $OfficeObject )
+                {
+                    UninstallOffice -OfficeObject $office 
+                }
+            }
+            else
+            {
+                UninstallOffice -OfficeObject $OfficeObject
+            }
+        }
+
+        $OfficeObject = CheckIfOfficeStillInstalled
+
         if($OfficeObject -ne $false)
         {
             OPUninstall
-            #IncrementStep -Project $Project
-            #Reboot
         }
 
-        if($OfficeObject.count -gt 1)
-        {
-
-            foreach($office in $OfficeObject ){
-                UninstallOffice -OfficeObject $office 
-            }
-        }
-        else
-        {
-                UninstallOffice -OfficeObject $OfficeObject
-        }
         IncrementStep -Project $Project
-
     }
     "2"
     {
-
-        $result  = CheckIfOffice365Installed
-        $OfficeObject = GetOfficeVersion
-        UninstallOffice -OfficeObject $OfficeObject
-        if($result -eq $false)
+        $OfficeObject = CheckIfOfficeStillInstalled
+        if($OfficeObject -eq $false)
         {
-
-            #Install Microsoft Office 365
-            InstallO365 -ListFiles $ListFiles
-
+            UninstallOffice -OfficeObject $OfficeObject
         }
+        #Install Microsoft Office 365
+        InstallO365 -ListFiles $ListFiles
 
         IncrementStep -Project $Project
-
+        
         Reboot
-
     }
     "3"
     {
         $ListUser = GetLocalUser
         $ID = $ListUser.ID
         logoff $ID
-
         $result  = CheckIfOffice365Installed
-
         if($result -eq $false)
         {
-
             InstallO365 -ListFiles $ListFiles
-
         }
-
-        $result  = CheckIfOffice365Installed
-
-        if($result -eq $false)
-        {
-            IncrementStep -Project $Project
-            Reboot
-
-        }
-        else
-        {
-
-            DeleteTaskMigration
-
-            DeleteStuff -ListFiles $ListFiles
-            IncrementStep -Project $Project
-        }
-        
+        DeleteTaskMigration
+        DeleteStuff -ListFiles $ListFiles
+        IncrementStep -Project $Project
+        Reboot
     }
     Default
     {
@@ -784,7 +767,7 @@ function downlaodGitHub
     $file | Add-Member -type NoteProperty -name FULLPATH -Value "c:\temp\deploiementOffice365.ps1"
     $files += $file
 
-    Download2 -Source "https://raw.githubusercontent.com/SebasHilotech/OfficeUninstall/master/Office365_EN_EN_FR_FR6.xml" -Ouput "c:\temp\Office365_FR_FR32.xml"
+    Download2 -Source "https://raw.githubusercontent.com/SebasHilotech/OfficeUninstall/master/Office365_EN_EN_FR_FR64.xml" -Ouput "c:\temp\Office365_FR_FR32.xml"
     $file = New-Object System.Object
     $Name = "deploiementOffice365"
     $file | Add-Member -type NoteProperty -name NAME -Value $Name
