@@ -457,8 +457,10 @@ function incrementReboot
 }
 function Reboot
 {
-    & shutdown.exe -t 0 -r
+
+    & shutdown.exe -t 0 -r -f
     Start-Sleep -Seconds 90
+
 }
 function GetStep
 {param($Project)
