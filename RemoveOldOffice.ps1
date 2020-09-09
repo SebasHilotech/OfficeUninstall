@@ -1,4 +1,3 @@
-﻿#region set variable parameter
 param([string]$WorkDirectory = "c:\temp",[string]$projectid="oldstuff",[string]$listDownload="stuff.csv")
 $ErrorActionPreference= 'silentlycontinue'
 function setRMM
@@ -342,7 +341,7 @@ function Download
 {param($id,$DownloadPath)
     $WebClient = New-Object System.Net.WebClient
     [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls11 -bor [System.Net.SecurityProtocolType]::Tls12
-    $url = "https://github.com/SebasHilotech/Production/blob/master/Remove-PreviousOfficeInstalls.zip"
+   # $url = "https://github.com/SebasHilotech/Production/blob/master/Remove-PreviousOfficeInstalls.zip"
     $url = "https://drive.google.com/uc?id=" + $id + "&export=download"
     $DownloadPath = "C:\temp\Remove-PreviousOfficeInstalls.zip"
     $WebClient.DownloadFile($url,$DownloadPath)
@@ -779,11 +778,43 @@ $Project | Add-Member -type NoteProperty -name WORKFOLDER -Value "$WorkDirectory
 $Project | Add-Member -type NoteProperty -name XMLDIRECTORY -Value "$XmlDirectory"
 $Project | Add-Member -type NoteProperty -name LISTDOWNLOAD -Value  "$WorkDirectory\$listDownload"
 
-$ListFiles = downlaodGitHub
+#$ListFiles = downlaodGitHub
 
-#Check if powershell5.1 is there, if not install, create task and proceed uninstall
-CallStep -Project $Project -ListFiles $ListFiles
-CallStep -Project $Project -ListFiles $ListFiles
-CallStep -Project $Project -ListFiles $ListFiles
-CallStep -Project $Project -ListFiles $ListFiles
-#endregion
+$resultValue  = ""
+
+$ListUser = GetLocalUser
+$ID = $ListUser.ID
+logoff $ID
+$OfficeObject = CheckIfOfficeStillInstalled
+
+if($OfficeObject -ne $false)
+{
+    if($OfficeObject.count -gt 1)
+    {
+        foreach($office in $OfficeObject )
+        {
+            $resultUninstall = UninstallOffice -OfficeObject $office 
+        }
+    }
+    else
+    {
+        $resultUninstall =  UninstallOffice -OfficeObject $OfficeObject
+    }
+}
+$OfficeObject = CheckIfOfficeStillInstalled
+if($OfficeObject -ne $false)
+{
+    OPUninstall
+    $resultValue += "OP"
+}
+
+$OfficeObject = CheckIfOfficeStillInstalled
+if($OfficeObject -eq $false)
+{
+    $resultValue += "Done"
+    New-Item -Path c:\temp\ -Name "UninstallOffice.txt" -Value $resultValue
+}else
+{
+    $resultValue += "Failed"
+    New-Item -Path c:\temp\ -Name "UninstallOffice.txt" -Value $resultValue
+}
