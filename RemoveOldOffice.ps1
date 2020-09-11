@@ -247,7 +247,7 @@ function CheckIfOfficeStillInstalled
     $Office32 = CheckIfOfficeStillInstalled32
     if($Office32 -eq $false)
     {
-        
+        $OfficeObject = $false
     }
     else
     {
@@ -258,7 +258,7 @@ function CheckIfOfficeStillInstalled
     $Office64 = CheckIfOfficeStillInstalled64
     if($Office64 -eq $false)
     {
-        
+        $OfficeObject = $false
     }
     else
     {
@@ -903,3 +903,5 @@ if($OfficeObject -eq $false)
     $resultValue += "Failed"
     New-Item -Path c:\temp\ -Name "UninstallOffice.txt" -Value $resultValue
 }
+
+return $resultValue
