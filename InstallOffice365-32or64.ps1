@@ -196,7 +196,7 @@ function UninstallOffice
 function InstallO365
 { param ($edition)
 
-    if($edition -eq "32")
+    if($edition -eq "64")
     {
         $Exe = "C:\temp\setup.exe"
         $XML = "C:\temp\Office365_FR_FR32.xml"
