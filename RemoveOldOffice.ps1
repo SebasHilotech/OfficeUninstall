@@ -288,7 +288,7 @@ function CheckIfOfficeStillInstalled64
             $OfficeObject = New-Object System.Object
             $UninstallString = $office.UninstallString
             $exe = getExe -uninstallString $UninstallString
-            $exeParam = getExeParam -uninstallString $exeParam
+            $exeParam = getExeParam -uninstallString $UninstallString
             $name = $office.DisplayName
             $exeParamSilent = getExeParamSilent -exe $exe -UninstallString $UninstallString -Version $name
             $OfficeObject | Add-Member -type NoteProperty -name "name" -Value "$name"
@@ -345,7 +345,7 @@ function CheckIfOfficeStillInstalled32
             $OfficeObject = New-Object System.Object
             $UninstallString = $office.UninstallString
             $exe = getExe -uninstallString $UninstallString
-            $exeParam = getExeParam -uninstallString $exeParam
+            $exeParam = getExeParam -uninstallString $UninstallString
             $name = $office.DisplayName
             $exeParamSilent = getExeParamSilent -exe $exe -UninstallString $UninstallString -Version $name
             $OfficeObject | Add-Member -type NoteProperty -name "name" -Value "$name"
