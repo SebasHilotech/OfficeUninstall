@@ -278,7 +278,7 @@ function CheckIfOfficeStillInstalled64
     {
         if($program.DisplayName -like "Microsoft Office*")
         {
-            if(($program.UninstallString -match "MsiExec") -or ($program.DisplayName -like "*Language Pack*")){}else{$OfficeVersion += $program}
+            if(($program.UninstallString -match "MsiExec") -or ($program.DisplayName -like "*Language Pack*") -or ($program.DisplayName -like "*viso*") -or ($program.DisplayName -like "*sharepoint*")  -or ($program.DisplayName -like "*project*")){}else{$OfficeVersion += $program}
         }
     }
     $ListOfficeObject = @()
@@ -335,7 +335,7 @@ function CheckIfOfficeStillInstalled32
     {
         if($program.DisplayName -like "Microsoft Office*")
         {
-            if(($program.UninstallString -match "MsiExec") -or ($program.DisplayName -like "*Language Pack*")){}else{$OfficeVersion += $program}
+            if(($program.UninstallString -match "MsiExec") -or ($program.DisplayName -like "*Language Pack*") -or ($program.DisplayName -like "*viso*") -or ($program.DisplayName -like "*sharepoint*")  -or ($program.DisplayName -like "*project*")){}else{$OfficeVersion += $program}
         }
     }
     $ListOfficeObject = @()
