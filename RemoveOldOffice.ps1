@@ -91,8 +91,12 @@ function GetUninstallXML
     elseif($version -match "Standard"){
         $XML =       GetBasicXML -type "Standard"
     }
-    elseif($version -match "Professional Plus"){
+    elseif($version -match "Professional Plus")
+    {
         $XML = GetBasicXML -type "ProPlus"
+    }elseif($version -match "SMALLBUSINESS")
+    {
+        $XML = GetBasicXML -type "SMALLBUSINESS"
     }
     $WorkFolder = "C:\temp"
     $UninstallXML = "uninstallOldOffice.xml"

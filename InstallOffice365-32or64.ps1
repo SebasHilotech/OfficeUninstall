@@ -859,6 +859,7 @@ $ListFiles = downlaodGitHub
 $edition = Get-Content C:\temp\old3264.txt 
 
 InstallO365 -ListFiles $ListFiles -edition $edition
+
 if(CheckIfOffice365Installed -eq $false)
 {
     if($edition -eq "64"){
@@ -868,6 +869,7 @@ if(CheckIfOffice365Installed -eq $false)
         InstallO365 -ListFiles $ListFiles -edition "64"
 
     }
+
     if(CheckIfOffice365Installed -eq $false)
     {
         $resultinstall = "fail"
@@ -876,7 +878,8 @@ if(CheckIfOffice365Installed -eq $false)
     {
         $resultinstall = "succes"
     }
-}else
+}
+else
 {
     $resultinstall = "succes"
 }
