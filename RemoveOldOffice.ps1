@@ -94,7 +94,7 @@ function GetUninstallXML
     elseif($version -match "Professional Plus")
     {
         $XML = GetBasicXML -type "ProPlus"
-    }elseif($version -match "SMALLBUSINESS")
+    }elseif($version -match "Small Business")
     {
         $XML = GetBasicXML -type "SMALLBUSINESS"
     }
