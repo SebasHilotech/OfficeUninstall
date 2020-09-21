@@ -2,7 +2,6 @@
   <Add OfficeClientEdition="32" Channel="Current">
     <Product ID="O365BusinessRetail">
       <Language ID="EN-us" />
-      <Language ID="fr-fr" />
       <ExcludeApp ID="Groove" />
       <ExcludeApp ID="OneDrive" />
       <ExcludeApp ID="Teams" />
