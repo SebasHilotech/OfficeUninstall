@@ -1,4 +1,5 @@
-param([string]$WorkDirectory = "c:\temp",[string]$projectid="oldstuff",[string]$listDownload="stuff.csv")
+$WorkDirectory = "c:\temp"
+
 $ErrorActionPreference= 'silentlycontinue'
 function setRMM
 {param($RMM)
@@ -22,15 +23,7 @@ function setRMM
         return $true
     }
 }
-<#
-if($null -ne $RMM)
-{
-    if(setRMM -RMM $RMM){}else{
-    #exit
-    }
-}
-#>
-#region set function
+
 function getExe
 {param($UninstallString)
 

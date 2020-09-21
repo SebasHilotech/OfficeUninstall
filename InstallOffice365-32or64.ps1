@@ -1,4 +1,4 @@
-param([string]$WorkDirectory = "c:\temp",[string]$projectid="oldstuff",[string]$listDownload="stuff.csv")
+$WorkDirectory = "c:\temp"
 $ErrorActionPreference= 'silentlycontinue'
 function setRMM
 {param($RMM)
