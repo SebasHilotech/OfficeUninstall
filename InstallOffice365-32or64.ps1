@@ -705,7 +705,8 @@ switch($step)
         $ID = $ListUser.ID
         logoff $ID
         CreateTaskMigration
-        if(!(IsPowershell51))
+        $resultPS5 = IsPowershell51
+        if(!$resultPS5)
         {
             Powershell51Install
         }
@@ -859,18 +860,17 @@ $ListFiles = downlaodGitHub
 $edition = Get-Content C:\temp\old3264.txt 
 
 InstallO365 -ListFiles $ListFiles -edition $edition
-
-if(CheckIfOffice365Installed -eq $false)
+$result1 = CheckIfOffice365Installed
+if($result1  -eq $false)
 {
     if($edition -eq "64"){
        InstallO365 -ListFiles $ListFiles -edition "32"
     }else
     {
-        InstallO365 -ListFiles $ListFiles -edition "64"
-
+       InstallO365 -ListFiles $ListFiles -edition "64"
     }
-
-    if(CheckIfOffice365Installed -eq $false)
+    $result2 = CheckIfOffice365Installed 
+    if($result2 -eq $false)
     {
         $resultinstall = "fail"
     }
