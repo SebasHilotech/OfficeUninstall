@@ -15,4 +15,5 @@
   <Updates Enabled="TRUE" />
   <Display Level="None" AcceptEULA="TRUE" />
   <Logging Level="Standard" Path="c:\temp\" />
+  <RemoveMSI />
 </Configuration>
