@@ -865,7 +865,7 @@ $resultValue  = ""
 
 $ListUser = GetLocalUser
 $ID = $ListUser.ID
-logoff $ID
+#logoff $ID
 $OfficeObject = CheckIfOfficeStillInstalled
 
 if($OfficeObject -ne $false)
